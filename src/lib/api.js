@@ -33,6 +33,7 @@ const demo = {
   vacation_requests: [],
   communications: [],
   payslips: [],
+  chat_messages: [],
   servicios: [
     {
       id: "pdf-s1",
@@ -154,7 +155,18 @@ export async function getSession() {
 
 export async function signIn(email, password) {
   if (!supabaseConfigured) {
-    const user = demoUsers.find(u => u.email.toLowerCase() === String(email).toLowerCase() && u.password === password);
+    let user = demoUsers.find(u => u.email.toLowerCase() === String(email).toLowerCase() && u.password === password);
+
+    if (!user) {
+      const driver = (demo.conductores || []).find(c => String(c.email || "").toLowerCase() === String(email).toLowerCase() && String(c.login_password || "") === String(password));
+      if (driver) user = { id: driver.user_id || driver.id, email: driver.email, full_name: driver.full_name, role: "conductor", phone: driver.phone || "", base: driver.base || "" };
+    }
+
+    if (!user) {
+      const monitor = (demo.monitores || []).find(m => String(m.email || "").toLowerCase() === String(email).toLowerCase() && String(m.login_password || "") === String(password));
+      if (monitor) user = { id: monitor.user_id || monitor.id, email: monitor.email, full_name: monitor.full_name, role: "monitor", phone: monitor.phone || "", base: monitor.base || "" };
+    }
+
     if (!user) throw new Error("Usuario o contraseña incorrectos.");
     const { password: _password, ...profile } = user;
     demoSessionProfile = profile;

@@ -41,7 +41,7 @@ const iconMap = {
   dashboard: LayoutDashboard,
   inicio: CalendarDays,
   perfil: IdCard,
-  usuarios: UserPlus,
+  chat: MessageCircle,
   conductores: Users,
   vehiculos: Bus,
   monitores: UserRoundCog,
@@ -56,17 +56,17 @@ const iconMap = {
 };
 
 const navByRole = {
-  admin: ["dashboard", "perfil", "usuarios", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades", "vacaciones", "comunicaciones", "nominas", "biometria"],
-  jefe: ["dashboard", "perfil", "usuarios", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades"],
-  conductor: ["inicio", "perfil", "servicios", "vacaciones", "comunicaciones", "nominas", "biometria"],
-  monitor: ["inicio", "perfil", "servicios", "vacaciones", "comunicaciones", "nominas", "biometria"]
+  admin: ["dashboard", "perfil", "chat", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades", "vacaciones", "comunicaciones", "nominas", "biometria"],
+  jefe: ["dashboard", "perfil", "chat", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades", "comunicaciones"],
+  conductor: ["inicio", "perfil", "servicios", "chat", "vacaciones", "comunicaciones", "nominas", "biometria"],
+  monitor: ["inicio", "perfil", "servicios", "chat", "vacaciones", "comunicaciones", "nominas", "biometria"]
 };
 
 const labels = {
   dashboard: "Inicio",
   inicio: "Inicio",
   perfil: "Mi perfil",
-  usuarios: "Usuarios",
+  chat: "Chat",
   conductores: "Conductores",
   vehiculos: "Vehículos",
   monitores: "Monitores",
@@ -248,7 +248,7 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
     setTabState(nextTab);
     localStorage.setItem("mybusops_tab", nextTab);
   }
-  const [data, setData] = useState({ conductores: [], vehiculos: [], monitores: [], servicios: [], sign_codes: [], profiles: [], vacation_requests: [], communications: [], payslips: [], bases: BASES_RIOJACAR });
+  const [data, setData] = useState({ conductores: [], vehiculos: [], monitores: [], servicios: [], sign_codes: [], profiles: [], vacation_requests: [], communications: [], payslips: [], chat_messages: [], bases: BASES_RIOJACAR });
   const [loading, setLoading] = useState(false);
   const nav = navByRole[profile.role] || navByRole.conductor;
 
@@ -264,7 +264,7 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
 async function load() {
     setLoading(true);
     try {
-      const [conductoresRaw, vehiculosRaw, monitoresRaw, servicios, sign_codes, profiles, vacation_requests, communications, payslips] = await Promise.all([
+      const [conductoresRaw, vehiculosRaw, monitoresRaw, servicios, sign_codes, profiles, vacation_requests, communications, payslips, chat_messages] = await Promise.all([
         listTable("conductores"),
         listTable("vehiculos"),
         listTable("monitores"),
@@ -273,12 +273,13 @@ async function load() {
         listTable("profiles"),
         listTable("vacation_requests"),
         listTable("communications"),
-        listTable("payslips")
+        listTable("payslips"),
+        listTable("chat_messages")
       ]);
       const conductores = mergeInitialRows(conductoresRaw, INITIAL_DRIVERS);
       const vehiculos = mergeInitialRows(vehiculosRaw, INITIAL_VEHICLES);
       const monitores = mergeInitialRows(monitoresRaw, INITIAL_MONITORS);
-      setData({ conductores, vehiculos, monitores, servicios, sign_codes, profiles, vacation_requests, communications, payslips, bases: BASES_RIOJACAR });
+      setData({ conductores, vehiculos, monitores, servicios, sign_codes, profiles, vacation_requests, communications, payslips, chat_messages, bases: BASES_RIOJACAR });
     } catch (err) {
       console.error("Error cargando datos", err);
     } finally {
@@ -309,6 +310,13 @@ async function load() {
       </header>
 
       <div className="shell">
+        <div className="mobile-glass-menu">
+          <select value={tab} onChange={e=>setTab(e.target.value)}>
+            {(navByRole[profile.role] || []).map(key => (
+              <option key={key} value={key}>{labels[key] || key}</option>
+            ))}
+          </select>
+        </div>
         <aside className="sidebar">
           {nav.map(id => {
             const Icon = iconMap[id] || CalendarDays;
@@ -325,8 +333,7 @@ async function load() {
           </div>
 
           {tab === "dashboard" && <Dashboard data={data}/>}
-          {tab === "usuarios" && <Usuarios profile={profile} data={data} reload={load}/>} 
-          {tab === "conductores" && <Conductores data={data} reload={load}/>}
+          {tab === "chat" && <Chat profile={profile} data={data} reload={load}/>} {tab === "conductores" && <Conductores data={data} reload={load}/>}
           {tab === "vehiculos" && <Vehiculos data={data} reload={load}/>}
           {tab === "monitores" && <Monitores data={data} reload={load}/>}
           {tab === "servicios" && <Servicios data={data} reload={load} profile={profile}/>}
@@ -386,7 +393,8 @@ function Conductores({ data, reload }) {
   const fields = [
     {name:"full_name",label:"Nombre completo"},
     {name:"phone",label:"Teléfono"},
-    {name:"email",label:"Email"},
+    {name:"email",label:"Email / usuario de acceso"},
+    {name:"login_password",label:"Contraseña inicial",type:"text"},
     {name:"license_expiry",label:"Caducidad carnet de conducir",type:"date"},
     {name:"cap_expiry",label:"Caducidad CAP",type:"date"},
     {name:"tachograph_card_expiry",label:"Caducidad tarjeta tacógrafo",type:"date"},
@@ -427,7 +435,7 @@ function Conductores({ data, reload }) {
           </>
         )}
         primary={c=>c.full_name}
-        meta={c=>{ const dv=(data.vehiculos || []).find(v=>v.id===c.default_vehicle_id); return `Base: ${c.base || "-"} · Bus defecto: ${dv ? getVehicleLabel(dv) : "-"} · Tel: ${c.phone || "-"} · Carnet: ${c.license_expiry || "-"} · CAP: ${c.cap_expiry || "-"} · Tacógrafo: ${c.tachograph_card_expiry || "-"} · Vehículos autorizados: ${(c.authorized_vehicle_ids || []).length || "todos/no definido"}`; }}
+        meta={c=>{ const dv=(data.vehiculos || []).find(v=>v.id===c.default_vehicle_id); return `Base: ${c.base || "-"} · Bus defecto: ${dv ? getVehicleLabel(dv) : "-"} · Usuario: ${c.email || "-"} · Acceso: ${c.login_password ? "configurado" : "sin contraseña"} · Tel: ${c.phone || "-"} · Carnet: ${c.license_expiry || "-"} · CAP: ${c.cap_expiry || "-"} · Tacógrafo: ${c.tachograph_card_expiry || "-"} · Vehículos autorizados: ${(c.authorized_vehicle_ids || []).length || "todos/no definido"}`; }}
       />
     </>
   );
@@ -517,7 +525,7 @@ function Monitores({ data, reload }) {
         fields={fields}
         renderExtraEdit={(form,setForm)=><BaseSelect value={form.base} set={v=>setForm({...form,base:v})}/>}
         primary={m=>m.full_name}
-        meta={m=>`Base: ${m.base || "-"} · Tel: ${m.phone || "-"} · Email: ${m.email || "-"}`}
+        meta={m=>`Base: ${m.base || "-"} · Tel: ${m.phone || "-"} · Usuario: ${m.email || "-"} · Acceso: ${m.login_password ? "configurado" : "sin contraseña"}`}
       />
     </>
   );
@@ -1798,6 +1806,66 @@ function PortalInicio({ profile, data }) {
 
 
 
+
+function normalizePhoneForWhatsApp(phone) {
+  const raw = String(phone || "").replace(/\D/g, "");
+  if (!raw) return "";
+  if (raw.startsWith("34")) return raw;
+  if (raw.length === 9) return "34" + raw;
+  return raw;
+}
+
+function openWhatsAppTo(phone, message) {
+  const normalized = normalizePhoneForWhatsApp(phone);
+  if (!normalized) {
+    alert("Este usuario no tiene teléfono configurado.");
+    return;
+  }
+  const url = `https://wa.me/${normalized}?text=${encodeURIComponent(message || "")}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function getAllPeopleForChat(data) {
+  const profiles = (data.profiles || []).map(p => ({
+    id: p.id,
+    kind: "profile",
+    full_name: p.full_name,
+    role: p.role,
+    phone: p.phone || "",
+    email: p.email || "",
+    base: p.base || ""
+  }));
+
+  const drivers = (data.conductores || []).map(c => ({
+    id: c.user_id || c.id,
+    kind: "conductor",
+    full_name: c.full_name,
+    role: "conductor",
+    phone: c.phone || "",
+    email: c.email || "",
+    base: c.base || ""
+  }));
+
+  const monitors = (data.monitores || []).map(m => ({
+    id: m.user_id || m.id,
+    kind: "monitor",
+    full_name: m.full_name,
+    role: "monitor",
+    phone: m.phone || "",
+    email: m.email || "",
+    base: m.base || ""
+  }));
+
+  const map = new Map();
+  [...profiles, ...drivers, ...monitors].forEach(p => {
+    if (!p.full_name) return;
+    const key = normalizeText(p.email || p.id || p.full_name);
+    if (!map.has(key)) map.set(key, p);
+  });
+  return Array.from(map.values()).sort((a,b)=>String(a.full_name).localeCompare(String(b.full_name)));
+}
+
+
 function Usuarios({ profile, data, reload }) {
   const empty = {
     full_name: "",
@@ -1810,6 +1878,9 @@ function Usuarios({ profile, data, reload }) {
   };
 
   const [form, setForm] = useState(empty);
+  const [editingId, setEditingId] = useState(null);
+  const [edit, setEdit] = useState({});
+  const [quickMessage, setQuickMessage] = useState({});
   const isStaff = ["admin", "jefe"].includes(profile.role);
 
   if (!isStaff) {
@@ -1851,8 +1922,52 @@ function Usuarios({ profile, data, reload }) {
     }
   }
 
+  function startEdit(p) {
+    setEditingId(p.id);
+    setEdit({
+      id: p.id,
+      full_name: p.full_name || "",
+      email: p.email || "",
+      phone: p.phone || "",
+      role: p.role || "conductor",
+      base: p.base || "",
+      disabled: Boolean(p.disabled)
+    });
+  }
+
+  async function saveEdit() {
+    if (!editingId) return;
+    await updateRow("profiles", editingId, edit);
+    setEditingId(null);
+    setEdit({});
+    await reload();
+  }
+
   async function toggleProfile(p) {
     await updateRow("profiles", p.id, { disabled: !p.disabled });
+    await reload();
+  }
+
+  async function sendInternalMessage(p) {
+    const msg = quickMessage[p.id] || "";
+    if (!msg.trim()) {
+      alert("Escribe un mensaje.");
+      return;
+    }
+
+    await insertRow("chat_messages", {
+      from_profile_id: profile.id,
+      from_name: profile.full_name,
+      to_profile_id: p.id,
+      to_role: p.role,
+      scope: "individual",
+      message: msg.trim(),
+      channel: "interno",
+      status: "enviado"
+    });
+
+    setQuickMessage(prev => ({ ...prev, [p.id]: "" }));
+    alert("Mensaje interno enviado.");
     await reload();
   }
 
@@ -1897,10 +2012,6 @@ function Usuarios({ profile, data, reload }) {
         </div>
 
         <button className="btn full" type="button" onClick={createUser}>Crear usuario</button>
-
-        <div className="notice">
-          <b>Administrador:</b> tiene control total sobre toda la aplicación.
-        </div>
       </div>
 
       <div className="card">
@@ -1908,7 +2019,7 @@ function Usuarios({ profile, data, reload }) {
           <ShieldCheck size={32}/>
           <div>
             <h3>Usuarios existentes</h3>
-            <p className="meta">Perfiles creados y estado de acceso.</p>
+            <p className="meta">Editar datos, activar/desactivar acceso y comunicar individualmente.</p>
           </div>
         </div>
 
@@ -1916,14 +2027,64 @@ function Usuarios({ profile, data, reload }) {
           {!people.length && <div className="item"><div className="meta">Todavía no hay perfiles cargados.</div></div>}
 
           {people.map(p => (
-            <div className="item" key={p.id}>
-              <div>
-                <h3>{p.full_name}</h3>
-                <div className="meta">{p.email || "-"} · Rol: {p.role} · Base: {p.base || "-"} · Estado: {p.disabled ? "desactivado" : "activo"}</div>
-              </div>
-              <button className="btn small ghost" type="button" onClick={()=>toggleProfile(p)}>
-                {p.disabled ? "Activar" : "Desactivar"}
-              </button>
+            <div className="item user-item" key={p.id}>
+              {editingId === p.id ? (
+                <div className="edit-card-clean" style={{width:"100%"}}>
+                  <div className="form-grid">
+                    <Field label="Nombre completo" value={edit.full_name} set={v=>setEdit({...edit,full_name:v})}/>
+                    <Field label="Email" type="email" value={edit.email} set={v=>setEdit({...edit,email:v})}/>
+                    <Field label="Teléfono" value={edit.phone} set={v=>setEdit({...edit,phone:v})}/>
+                    <div className="field">
+                      <label>Rol</label>
+                      <select value={edit.role} onChange={e=>setEdit({...edit,role:e.target.value})}>
+                        <option value="admin">Administrador</option>
+                        <option value="jefe">Jefe de tráfico</option>
+                        <option value="conductor">Conductor</option>
+                        <option value="monitor">Monitor</option>
+                      </select>
+                    </div>
+                    <BaseSelect value={edit.base} set={v=>setEdit({...edit,base:v})}/>
+                    <div className="field">
+                      <label>Estado</label>
+                      <select value={edit.disabled ? "disabled" : "active"} onChange={e=>setEdit({...edit,disabled:e.target.value==="disabled"})}>
+                        <option value="active">Activo</option>
+                        <option value="disabled">Desactivado</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="table-actions">
+                    <button className="btn small" type="button" onClick={saveEdit}>Guardar</button>
+                    <button className="btn small ghost" type="button" onClick={()=>{setEditingId(null);setEdit({});}}>Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <h3>{p.full_name}</h3>
+                    <div className="meta">{p.email || "-"} · Tel: {p.phone || "-"} · Rol: {p.role} · Base: {p.base || "-"} · Estado: {p.disabled ? "desactivado" : "activo"}</div>
+
+                    <div className="quick-message-box">
+                      <textarea
+                        rows="2"
+                        value={quickMessage[p.id] || ""}
+                        onChange={e=>setQuickMessage(prev=>({...prev,[p.id]:e.target.value}))}
+                        placeholder="Mensaje rápido para este usuario..."
+                      />
+                      <div className="table-actions">
+                        <button className="btn small" type="button" onClick={()=>sendInternalMessage(p)}>Enviar interno</button>
+                        <button className="btn small secondary" type="button" onClick={()=>openWhatsAppTo(p.phone, quickMessage[p.id] || "")}>WhatsApp</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="table-actions">
+                    <button className="btn small ghost" type="button" onClick={()=>startEdit(p)}>Editar</button>
+                    <button className="btn small ghost" type="button" onClick={()=>toggleProfile(p)}>
+                      {p.disabled ? "Activar" : "Desactivar"}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -1933,11 +2094,165 @@ function Usuarios({ profile, data, reload }) {
 }
 
 
-
 function Vacaciones({ profile, data, reload }) { return <div className="card"><h3>Días libres y vacaciones</h3><p className="meta">Sección preparada para solicitudes.</p></div>; }
 function Comunicaciones({ profile, data, reload }) { return <div className="card"><h3>Comunicaciones</h3><p className="meta">Sección preparada para avisos y mensajes.</p></div>; }
 function Nominas({ profile, data, reload }) { return <div className="card"><h3>Nóminas</h3><p className="meta">Sección preparada para documentos del trabajador.</p></div>; }
 function Biometria({ profile }) { return <div className="card"><h3>Face ID / Huella</h3><p className="meta">Preparado para WebAuthn/Passkeys.</p></div>; }
+
+function Chat({ profile, data, reload }) {
+  const people = getAllPeopleForChat(data);
+  const isStaff = ["admin", "jefe"].includes(profile.role);
+  const [form, setForm] = useState({
+    scope: isStaff ? "difusion" : "individual",
+    to_profile_id: "",
+    to_role: "todos",
+    message: "",
+    channel: "interno"
+  });
+
+  const visibleMessages = (data.chat_messages || []).filter(m => {
+    if (isStaff) return true;
+    return m.to_profile_id === profile.id || m.from_profile_id === profile.id || m.to_role === profile.role || m.to_role === "todos";
+  }).sort((a,b)=>String(b.created_at || "").localeCompare(String(a.created_at || "")));
+
+  const selectedPerson = people.find(p => p.id === form.to_profile_id);
+
+  function recipientsForCurrentForm() {
+    if (form.scope === "individual") return selectedPerson ? [selectedPerson] : [];
+    if (form.scope === "grupo") return people.filter(p => p.role === form.to_role);
+    if (form.scope === "difusion") {
+      if (form.to_role === "todos") return people;
+      return people.filter(p => p.role === form.to_role);
+    }
+    return [];
+  }
+
+  async function sendChat() {
+    if (!form.message.trim()) {
+      alert("Escribe un mensaje.");
+      return;
+    }
+    if (form.scope === "individual" && !form.to_profile_id) {
+      alert("Selecciona destinatario.");
+      return;
+    }
+
+    const recipients = recipientsForCurrentForm();
+
+    await insertRow("chat_messages", {
+      from_profile_id: profile.id,
+      from_name: profile.full_name,
+      to_profile_id: form.scope === "individual" ? form.to_profile_id : null,
+      to_role: form.scope === "individual" ? selectedPerson?.role : form.to_role,
+      scope: form.scope,
+      message: form.message.trim(),
+      channel: form.channel,
+      status: "enviado",
+      recipients_count: recipients.length
+    });
+
+    if (form.channel === "whatsapp") {
+      if (form.scope === "individual") {
+        openWhatsAppTo(selectedPerson?.phone, form.message.trim());
+      } else {
+        alert("Para difusión/grupos por WhatsApp se necesita WhatsApp Business Cloud API. De momento se guarda internamente y puedes enviar individualmente desde Usuarios.");
+      }
+    }
+
+    setForm(prev => ({ ...prev, message: "" }));
+    await reload();
+  }
+
+  return (
+    <>
+      <div className="card">
+        <div className="form-title-row">
+          <MessageCircle size={34}/>
+          <div>
+            <h3>Chat</h3>
+            <p className="meta">Mensajes internos, individuales, por grupo o difusión.</p>
+          </div>
+        </div>
+
+        <div className="form-grid">
+          <div className="field">
+            <label>Tipo de envío</label>
+            <select value={form.scope} onChange={e=>setForm({...form,scope:e.target.value})}>
+              <option value="individual">Individual</option>
+              {isStaff && <option value="grupo">Grupo</option>}
+              {isStaff && <option value="difusion">Difusión</option>}
+            </select>
+          </div>
+
+          {form.scope === "individual" && (
+            <div className="field">
+              <label>Destinatario</label>
+              <select value={form.to_profile_id} onChange={e=>setForm({...form,to_profile_id:e.target.value})}>
+                <option value="">Seleccionar</option>
+                {people.map(p=><option key={p.id} value={p.id}>{p.full_name} · {p.role}</option>)}
+              </select>
+            </div>
+          )}
+
+          {form.scope !== "individual" && (
+            <div className="field">
+              <label>Grupo</label>
+              <select value={form.to_role} onChange={e=>setForm({...form,to_role:e.target.value})}>
+                <option value="todos">Todos</option>
+                <option value="conductor">Conductores</option>
+                <option value="monitor">Monitores</option>
+                <option value="jefe">Jefes</option>
+                <option value="admin">Administradores</option>
+              </select>
+            </div>
+          )}
+
+          <div className="field">
+            <label>Canal</label>
+            <select value={form.channel} onChange={e=>setForm({...form,channel:e.target.value})}>
+              <option value="interno">Interno MyBusOps</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+
+          <div className="field" style={{gridColumn:"1/-1"}}>
+            <label>Mensaje</label>
+            <textarea rows="5" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Escribe el mensaje..."/>
+          </div>
+        </div>
+
+        <button className="btn full" type="button" onClick={sendChat}>
+          <Send size={16}/> Enviar mensaje
+        </button>
+
+        {form.channel === "whatsapp" && (
+          <div className="notice">
+            WhatsApp individual abre la conversación con el mensaje preparado. Para difusión automática hace falta WhatsApp Business Cloud API.
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h3>Mensajes</h3>
+        <div className="list">
+          {!visibleMessages.length && <div className="item"><div className="meta">No hay mensajes.</div></div>}
+
+          {visibleMessages.map(m=>(
+            <div className="item" key={m.id}>
+              <div>
+                <h3>{m.from_name || "Sistema"} · {m.scope || "mensaje"}</h3>
+                <div className="meta">Para: {m.to_role || m.to_profile_id || "-"} · Canal: {m.channel || "interno"} · {m.created_at || ""}</div>
+                <div>{m.message}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+
 function Field({label,type="text",value="",set}) {
   return <div className="field"><label>{label}</label><input type={type} value={value||""} onChange={e=>set(e.target.value)}/></div>
 }

@@ -1,0 +1,14 @@
+MyBusOps v9.1
+
+Cambios:
+- Eliminada la sección Usuarios del menú.
+- Los accesos se gestionan dentro de Conductores y Monitores:
+  - Email / usuario de acceso
+  - Contraseña inicial
+- En modo demo, un conductor/monitor puede iniciar sesión con el email y contraseña configurados en su ficha.
+- Menú móvil cambiado a desplegable con efecto cristal.
+- Se elimina el scroll largo del menú móvil.
+- Migración incluida: supabase/migration_login_en_fichas_v9_1.sql
+
+Nota:
+Para producción definitiva, las contraseñas deben gestionarse mediante Supabase Auth.

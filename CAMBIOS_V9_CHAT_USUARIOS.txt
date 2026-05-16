@@ -1,0 +1,18 @@
+MyBusOps v9
+
+Añadido:
+- Usuarios editables.
+- Comunicación rápida desde la ficha de usuario.
+- Envío interno individual.
+- Botón WhatsApp individual mediante wa.me.
+- Nueva sección Chat:
+  - individual
+  - grupo
+  - difusión
+  - canal interno
+  - canal WhatsApp preparado
+- Migración Supabase: supabase/migration_chat_v9.sql
+
+WhatsApp:
+- Envío individual abre WhatsApp con el mensaje preparado.
+- Envío automático masivo/difusión requiere WhatsApp Business Cloud API de Meta.

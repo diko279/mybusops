@@ -217,3 +217,39 @@ textarea{resize:vertical}
 .notice code{background:rgba(255,255,255,.7);padding:2px 5px;border-radius:6px}
 
 .error-box{background:#fff2f2;border:1px solid #e5b4b4;color:#8b0000;border-radius:12px;padding:12px;margin:12px 0;font-family:monospace;word-break:break-word}
+
+
+.quick-message-box{margin-top:10px;border-top:1px solid #eee;padding-top:8px}
+.quick-message-box textarea{width:100%;border:1px solid #ddd;border-radius:12px;padding:8px;resize:vertical}
+.user-item{align-items:flex-start}
+
+
+.mobile-glass-menu{display:none}
+@media(max-width:820px){
+  .mobile-glass-menu{
+    display:block;
+    position:sticky;
+    top:8px;
+    z-index:80;
+    margin:8px 8px 10px;
+    padding:10px;
+    border:1px solid rgba(255,255,255,.45);
+    border-radius:18px;
+    background:rgba(255,255,255,.62);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+  }
+  .mobile-glass-menu select{
+    width:100%;
+    border:0!important;
+    background:rgba(255,255,255,.75)!important;
+    color:#111!important;
+    font-weight:900;
+    border-radius:14px!important;
+    padding:12px 14px!important;
+    outline:none;
+  }
+  .sidebar{display:none!important}
+  .app-shell,.main{overflow-x:hidden!important}
+}
