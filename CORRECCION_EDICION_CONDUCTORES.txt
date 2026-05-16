@@ -1,0 +1,4 @@
+Corrección v6.3:
+- Reparado el panel de edición de conductores/vehículos/monitores.
+- Ahora los campos se muestran dentro de un edit-panel de ancho completo.
+- Los inputs usan un borrador local editable y permiten escribir correctamente.

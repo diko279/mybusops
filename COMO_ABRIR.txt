@@ -1,0 +1,15 @@
+NO ABRAS index.html CON DOBLE CLIC.
+
+Esta app es React/Vite y necesita servidor local.
+
+PASOS:
+1. Instala Node.js LTS si no lo tienes.
+2. Descomprime esta carpeta en el escritorio.
+3. Haz doble clic en iniciar_app.bat.
+4. Espera a que instale y arranque.
+5. Abre Chrome en:
+   http://localhost:5173
+
+Si PowerShell da error de scripts, usa iniciar_app.bat porque se abre con CMD.
+
+Si la ventana muestra otro puerto, por ejemplo 5174, abre ese.

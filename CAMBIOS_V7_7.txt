@@ -1,0 +1,6 @@
+MyBusOps v7.7
+
+- Renombrada la plataforma a MyBusOps.
+- Añadido botón "Reenviar email" en servicios ya guardados.
+- El jefe de tráfico puede reenviar cualquier servicio al conductor y monitor sin volver a crearlo.
+- Mantiene PDF y adjuntos automáticamente.

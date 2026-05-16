@@ -1,0 +1,29 @@
+PASOS PARA CONECTAR LA APP A SUPABASE
+
+1. Crear proyecto en https://supabase.com
+2. Ir a SQL Editor.
+3. Copiar y ejecutar supabase/schema.sql.
+4. Ir a Authentication > Users.
+5. Crear usuarios:
+   - jefe@tuempresa.com
+   - conductor1@tuempresa.com
+   - monitor1@tuempresa.com
+6. Ir a Table Editor > profiles.
+7. Crear una fila por usuario:
+   - id = UUID del usuario de Authentication
+   - full_name = nombre
+   - role = admin / jefe / conductor / monitor
+8. Copiar Project URL y anon public key.
+9. Crear archivo .env en la raíz copiando .env.example.
+10. Ejecutar:
+   npm install
+   npm run dev
+
+IMPORTANTE:
+- Las reglas RLS impiden que un conductor vea datos de otros.
+- El jefe/admin puede ver y editar todo.
+- Para crear APK Android:
+  npm run build
+  npx cap add android
+  npx cap sync android
+  npx cap open android

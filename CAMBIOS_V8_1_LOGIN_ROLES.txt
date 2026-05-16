@@ -1,0 +1,11 @@
+MyBusOps v8.1
+
+Corrección:
+- La app ya no entra directamente como jefe en modo demo.
+- Al abrir, siempre aparece la pantalla de autenticación.
+- Según el usuario se abre un portal distinto:
+  - jefe@mybusops.local / 1234 -> portal jefe de tráfico
+  - diko@mybusops.local / 1234 -> portal conductor
+  - cristina@mybusops.local / 1234 -> portal monitor
+
+Cuando se conecte Supabase real, esta lógica usará Authentication + tabla profiles.

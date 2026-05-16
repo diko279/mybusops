@@ -1,0 +1,9 @@
+Corregido error:
+BASES_RIOJACAR is not defined.
+
+Causa:
+api.js usaba datos iniciales definidos en main.jsx, pero main.jsx no comparte variables con api.js.
+
+Solución:
+Se ha creado src/lib/seedData.js con bases, conductores, vehículos, monitores y códigos compartidos.
+api.js y main.jsx leen de ese archivo.

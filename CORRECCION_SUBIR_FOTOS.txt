@@ -1,0 +1,6 @@
+Cambio v6.4:
+- Conductores: botón para subir foto desde el equipo.
+- Pensado para foto escaneada del carnet de conducir.
+- La imagen se guarda temporalmente como Data URL en el registro.
+- En producción con Supabase se recomienda guardar la imagen en Supabase Storage y guardar solo la URL.
+- Vehículos: también queda preparado botón de subir foto.

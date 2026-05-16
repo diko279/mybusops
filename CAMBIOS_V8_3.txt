@@ -1,0 +1,12 @@
+MyBusOps v8.3
+
+- PDF diario mucho más compacto y continuo, más parecido al original enviado.
+- Todos los servicios aparecen seguidos en el mismo PDF.
+- Cabecera compacta con logo y datos.
+- Eliminado botón Confirmar visto.
+- Al pulsar Iniciar servicio:
+  - se confirma automáticamente la lectura
+  - comienza el tiempo de servicio
+- Al finalizar:
+  - se guarda hora final
+  - se calcula duración total en minutos

@@ -1,0 +1,11 @@
+MyBusOps v8.2
+
+- PDF operativo ajustado al estilo del ejemplo proporcionado:
+  cabecera compacta, logo, bus -> conductor, fecha, teléfono, líneas de servicio y MD5.
+- PDF conductor agrupado en una sola hoja diaria.
+- PDF monitor agrupado simplificado.
+- Cargados como servicios demo los del PDF enviado:
+  18/05/2026, Diko, bus 116/141, Cristina/Pilar, códigos 9000, 6106, 6103, 4.
+- Portal conductor/monitor con pestaña Inicio.
+- Inicio muestra calendario mensual con días que tienen servicio.
+- Inicio muestra avisos/comunicaciones de oficina.

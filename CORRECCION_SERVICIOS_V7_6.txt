@@ -1,0 +1,6 @@
+Corrección v7.6:
+- Los botones Confirmar visto / Iniciar servicio / Finalizar servicio ya no aparecen para jefe/admin.
+- Solo aparecen para conductor o monitor.
+- Corregido fallo de guardado: el navegador no soportaba MD5 con crypto.subtle.
+- Ahora se genera identificador hexadecimal de 32 caracteres para el campo md5 sin romper el guardado.
+- Los botones Guardar servicio y Enviar servicio muestran alertas de error si algo falla.

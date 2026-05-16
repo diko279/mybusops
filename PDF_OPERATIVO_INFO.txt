@@ -1,0 +1,8 @@
+MyBusOps v7.8
+
+- PDF operativo compacto tipo tráfico real.
+- 1 solo PDF diario por conductor.
+- 1 solo PDF diario por monitor.
+- Formato inspirado en el ejemplo real proporcionado.
+- Servicios ordenados por hora.
+- Incluye códigos luminosos, bus y notas.

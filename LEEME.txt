@@ -1,0 +1,7 @@
+USO:
+
+1. Ejecuta:
+   FleetOps_Riojacar.bat
+
+La primera vez instalará dependencias automáticamente.
+Después iniciará la app y el servidor de correo.

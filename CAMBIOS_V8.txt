@@ -1,0 +1,21 @@
+MyBusOps v8
+
+Añadido:
+- Pie legal en todas las páginas: creado por Diko Borislavov Dikov, derechos reservados.
+- Portal conductor/monitor separado del panel jefe.
+- El conductor entra directamente a su perfil/portal.
+- Secciones conductor/monitor:
+  - Mi perfil
+  - Servicios
+  - Días libres y vacaciones
+  - Comunicaciones a la empresa
+  - Nóminas
+  - Face ID / Huella preparado mediante WebAuthn
+- Jefe/admin puede ver solicitudes, comunicaciones y subir nóminas.
+- Tablas nuevas para Supabase:
+  - vacation_requests
+  - communications
+  - payslips
+
+Nota importante:
+Face ID/Huella real requiere WebAuthn con backend HTTPS. En local solo se comprueba compatibilidad.

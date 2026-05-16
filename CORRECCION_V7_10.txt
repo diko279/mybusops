@@ -1,0 +1,5 @@
+MyBusOps v7.10
+
+Corrección:
+- Reparado error al abrir pestaña Servicios: dailySendDate is not defined.
+- La variable de fecha para envío agrupado queda inicializada dentro del componente Servicios.

@@ -1,0 +1,5 @@
+Corrección v6.6:
+- La edición ya no se abre dentro de la fila del conductor.
+- Ahora se abre en una tarjeta independiente superior.
+- Se corrige el bloqueo de escritura/cursor por solapamiento visual.
+- CSS reforzado para que inputs/selects sean interactivos.

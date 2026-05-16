@@ -1,0 +1,32 @@
+CONFIGURAR ENVÍO CON GMAIL GRATUITO
+
+1. Entra en tu cuenta de Google:
+   elpaseosanvicente@gmail.com
+
+2. Activa la verificación en 2 pasos.
+
+3. Crea una contraseña de aplicación:
+   Cuenta de Google > Seguridad > Verificación en 2 pasos > Contraseñas de aplicaciones
+
+4. Copia la contraseña de 16 caracteres.
+
+5. En la carpeta de la app, abre el archivo:
+   .env
+
+6. Pon:
+   GMAIL_USER=elpaseosanvicente@gmail.com
+   GMAIL_APP_PASSWORD=la_contraseña_de_aplicación_sin_espacios
+
+7. Guarda el archivo.
+
+8. Abre:
+   iniciar_app.bat
+
+9. En FleetOps, el conductor debe tener email configurado.
+
+LIMITACIÓN IMPORTANTE:
+Con Gmail gratuito, el remitente real será la cuenta autenticada:
+elpaseosanvicente@gmail.com
+
+El email del perfil del jefe se usa como replyTo y referencia.
+Para usar remitentes profesionales reales y adjuntar PDF de forma estable, más adelante se migrará a Resend.

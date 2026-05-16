@@ -1,0 +1,10 @@
+MyBusOps v7.9
+
+- Dashboard del jefe con bandeja de pendientes de envío.
+- Ya no se visualizan únicamente servicios sueltos: se agrupan por conductor/monitor y día.
+- Desde el Dashboard se puede enviar un PDF diario a cada conductor o monitor.
+- Estados separados:
+  driver_sent_at / monitor_sent_at
+  driver_seen_at / monitor_seen_at
+- La confirmación de lectura fiable se registra dentro de la app cuando conductor/monitor pulsa Confirmar visto.
+- Nota: confirmación automática por apertura de email no es fiable con Gmail; algunos clientes bloquean píxeles de seguimiento.

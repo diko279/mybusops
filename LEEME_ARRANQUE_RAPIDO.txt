@@ -1,0 +1,9 @@
+ARRANQUE RÁPIDO
+
+1. La primera vez ejecuta:
+   instalar_dependencias.bat
+
+2. Después, para abrir la app cada día, usa solo:
+   iniciar_app.bat
+
+No uses npm install cada vez porque tarda mucho.
