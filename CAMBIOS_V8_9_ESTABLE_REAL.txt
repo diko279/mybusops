@@ -1,0 +1,5 @@
+MyBusOps v8.9
+- Corregido fallo de pantalla blanca por iconos no importados.
+- Login y menú estable.
+- Admin demo: admin@mybusops.local / 1234.
+- Carga de datos más resistente.

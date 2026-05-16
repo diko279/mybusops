@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Bus, CalendarDays, Car, ClipboardList, IdCard, LayoutDashboard, LogOut, Users, UserRoundCog, AlertTriangle, Image, Settings , UserPlus, ShieldCheck } from "lucide-react";
+import {AlertTriangle, Bus, CalendarDays, Car, ClipboardList, FileText, Fingerprint, IdCard, Image, LayoutDashboard, LogOut, MessageSquare, Plane, Settings, ShieldCheck, UserPlus, UserRoundCog, Users} from "lucide-react";
 import { getSession, signIn, signOut, listTable, insertRow, updateRow, deleteRow, createAuthUser } from "./lib/api";
 import { supabaseConfigured } from "./lib/supabase";
 import { BASES_RIOJACAR, KNOWN_PLACES, INITIAL_DRIVERS, INITIAL_VEHICLES, INITIAL_MONITORS, INITIAL_SIGN_CODES } from "./lib/seedData";
@@ -220,7 +220,7 @@ function Login({ onLogin }) {
 
         {!supabaseConfigured && (
           <div className="notice">
-            Modo demo: añade las claves de Supabase en <b>.env</b> cuando quieras conectar la base online.
+            Usuarios de acceso disponibles en modo prueba.<br/><b>admin@mybusops.local</b> / 1234
           </div>
         )}
 
@@ -248,7 +248,7 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
     setTabState(nextTab);
     localStorage.setItem("mybusops_tab", nextTab);
   }
-  const [data, setData] = useState({ conductores: [], vehiculos: [], monitores: [], servicios: [], sign_codes: [], profiles: [], bases: BASES_RIOJACAR });
+  const [data, setData] = useState({ conductores: [], vehiculos: [], monitores: [], servicios: [], sign_codes: [], profiles: [], vacation_requests: [], communications: [], payslips: [], bases: BASES_RIOJACAR });
   const [loading, setLoading] = useState(false);
   const nav = navByRole[profile.role] || navByRole.conductor;
 
@@ -264,18 +264,23 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
 async function load() {
     setLoading(true);
     try {
-      const [conductoresRaw, vehiculosRaw, monitoresRaw, servicios, sign_codes, profiles] = await Promise.all([
+      const [conductoresRaw, vehiculosRaw, monitoresRaw, servicios, sign_codes, profiles, vacation_requests, communications, payslips] = await Promise.all([
         listTable("conductores"),
         listTable("vehiculos"),
         listTable("monitores"),
         listTable("servicios"),
         listTable("sign_codes"),
-        listTable("profiles")
+        listTable("profiles"),
+        listTable("vacation_requests"),
+        listTable("communications"),
+        listTable("payslips")
       ]);
       const conductores = mergeInitialRows(conductoresRaw, INITIAL_DRIVERS);
       const vehiculos = mergeInitialRows(vehiculosRaw, INITIAL_VEHICLES);
       const monitores = mergeInitialRows(monitoresRaw, INITIAL_MONITORS);
-      setData({ conductores, vehiculos, monitores, servicios, sign_codes, profiles, bases: BASES_RIOJACAR });
+      setData({ conductores, vehiculos, monitores, servicios, sign_codes, profiles, vacation_requests, communications, payslips, bases: BASES_RIOJACAR });
+    } catch (err) {
+      console.error("Error cargando datos", err);
     } finally {
       setLoading(false);
     }
@@ -331,6 +336,10 @@ async function load() {
           {tab === "inicio" && <PortalInicio profile={profile} data={data}/>}
           {tab === "perfil" && <Perfil profile={profile} data={data} onProfileUpdate={onProfileUpdate}/>}
           {tab === "ajustes" && <AjustesLogin />}
+          {tab === "vacaciones" && <Vacaciones profile={profile} data={data} reload={load}/>}
+          {tab === "comunicaciones" && <Comunicaciones profile={profile} data={data} reload={load}/>}
+          {tab === "nominas" && <Nominas profile={profile} data={data} reload={load}/>}
+          {tab === "biometria" && <Biometria profile={profile}/>}
         </main>
       </div>
     </div>
@@ -1924,6 +1933,11 @@ function Usuarios({ profile, data, reload }) {
 }
 
 
+
+function Vacaciones({ profile, data, reload }) { return <div className="card"><h3>Días libres y vacaciones</h3><p className="meta">Sección preparada para solicitudes.</p></div>; }
+function Comunicaciones({ profile, data, reload }) { return <div className="card"><h3>Comunicaciones</h3><p className="meta">Sección preparada para avisos y mensajes.</p></div>; }
+function Nominas({ profile, data, reload }) { return <div className="card"><h3>Nóminas</h3><p className="meta">Sección preparada para documentos del trabajador.</p></div>; }
+function Biometria({ profile }) { return <div className="card"><h3>Face ID / Huella</h3><p className="meta">Preparado para WebAuthn/Passkeys.</p></div>; }
 function Field({label,type="text",value="",set}) {
   return <div className="field"><label>{label}</label><input type={type} value={value||""} onChange={e=>set(e.target.value)}/></div>
 }
@@ -2118,7 +2132,7 @@ function App() {
   }, []);
 
 useEffect(() => {
-    getSession().then(r => setProfile(r.profile)).finally(()=>setChecking(false));
+    getSession().then(r => { if (r?.profile) setProfile(r.profile); }).finally(()=>setChecking(false));
   }, []);
 
   if (checking) return <div className="login-screen"><div className="login-card">Cargando...</div></div>;
