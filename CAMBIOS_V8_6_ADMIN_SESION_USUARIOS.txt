@@ -1,0 +1,11 @@
+MyBusOps v8.6
+
+- Menú jefe/admin incluye Usuarios.
+- Usuario administrador demo:
+  admin@mybusops.local / 1234
+- Administrador con control total de la app.
+- La sesión se mantiene al recargar.
+- La pestaña actual se mantiene al recargar.
+- Eliminados textos visibles que hacían referencia a Supabase pendiente.
+- Edge Function create-user incluida.
+- Migración profiles.disabled incluida.

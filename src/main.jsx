@@ -39,26 +39,34 @@ class ErrorBoundary extends React.Component {
 
 const iconMap = {
   dashboard: LayoutDashboard,
+  inicio: CalendarDays,
+  perfil: IdCard,
+  usuarios: UserPlus,
   conductores: Users,
   vehiculos: Bus,
   monitores: UserRoundCog,
   servicios: ClipboardList,
-  codigos: ClipboardList,
-  bases: LayoutDashboard,
+  codigos: IdCard,
+  bases: Car,
   caducidades: AlertTriangle,
-  perfil: IdCard,
-  ajustes: Settings,
+  vacaciones: Plane,
+  comunicaciones: MessageSquare,
+  nominas: FileText,
+  biometria: Fingerprint
 };
 
 const navByRole = {
-  admin: ["dashboard", "conductores", "vehiculos", "monitores", "servicios", "caducidades", "ajustes"],
+  admin: ["dashboard", "perfil", "usuarios", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades", "vacaciones", "comunicaciones", "nominas", "biometria"],
   jefe: ["dashboard", "perfil", "usuarios", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades"],
-  conductor: ["dashboard", "perfil", "servicios", "caducidades"],
-  monitor: ["dashboard", "perfil", "servicios"]
+  conductor: ["inicio", "perfil", "servicios", "vacaciones", "comunicaciones", "nominas", "biometria"],
+  monitor: ["inicio", "perfil", "servicios", "vacaciones", "comunicaciones", "nominas", "biometria"]
 };
 
 const labels = {
   dashboard: "Inicio",
+  inicio: "Inicio",
+  perfil: "Mi perfil",
+  usuarios: "Usuarios",
   conductores: "Conductores",
   vehiculos: "Vehículos",
   monitores: "Monitores",
@@ -66,8 +74,10 @@ const labels = {
   codigos: "Códigos letrero",
   bases: "Bases",
   caducidades: "Caducidades",
-  perfil: "Mi perfil",
-  ajustes: "Ajustes"
+  vacaciones: "Días libres y vacaciones",
+  comunicaciones: "Comunicaciones",
+  nominas: "Nóminas",
+  biometria: "Face ID / Huella"
 };
 
 async function generateServiceMd5(payload) {
@@ -192,7 +202,12 @@ function Login({ onLogin }) {
 }
 
 function Shell({ profile, onProfileUpdate, onLogout }) {
-  const [tab, setTab] = useState("dashboard");
+  const [tab, setTabState] = useState(() => localStorage.getItem("mybusops_tab") || "dashboard");
+
+  function setTab(nextTab) {
+    setTabState(nextTab);
+    localStorage.setItem("mybusops_tab", nextTab);
+  }
   const [data, setData] = useState({ conductores: [], vehiculos: [], monitores: [], servicios: [], sign_codes: [], profiles: [], bases: BASES_RIOJACAR });
   const [loading, setLoading] = useState(false);
   const nav = navByRole[profile.role] || navByRole.conductor;
@@ -251,11 +266,12 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
           <div className="page-head">
             <div>
               <h2><PageIcon size={24}/> {labels[tab]}</h2>
-              <p>{loading ? "Cargando datos..." : "Datos sincronizados con la base online cuando Supabase esté configurado."}</p>
+              <p>{loading ? "Cargando datos..." : "Panel principal de gestión."}</p>
             </div>
           </div>
 
           {tab === "dashboard" && <Dashboard data={data}/>}
+          {tab === "usuarios" && <Usuarios profile={profile} data={data} reload={load}/>} 
           {tab === "conductores" && <Conductores data={data} reload={load}/>}
           {tab === "vehiculos" && <Vehiculos data={data} reload={load}/>}
           {tab === "monitores" && <Monitores data={data} reload={load}/>}
@@ -1736,10 +1752,15 @@ function Usuarios({ profile, data, reload }) {
   };
 
   const [form, setForm] = useState(empty);
-  const isStaff = ["admin","jefe"].includes(profile.role);
+  const isStaff = ["admin", "jefe"].includes(profile.role);
 
   if (!isStaff) {
-    return <div className="card"><h3>Sin permiso</h3><p className="meta">Solo jefe/admin puede gestionar usuarios.</p></div>;
+    return (
+      <div className="card">
+        <h3>Sin permiso</h3>
+        <p className="meta">Solo administrador o jefe puede gestionar usuarios.</p>
+      </div>
+    );
   }
 
   function set(name, value) {
@@ -1763,10 +1784,7 @@ function Usuarios({ profile, data, reload }) {
         create_person_record: form.create_person_record
       });
 
-      alert(result.demo
-        ? "Usuario creado en modo demo/local."
-        : "Usuario creado correctamente en Supabase Auth.");
-
+      alert(result.demo ? "Usuario creado." : "Usuario creado correctamente.");
       setForm(empty);
       await reload();
     } catch (err) {
@@ -1789,7 +1807,7 @@ function Usuarios({ profile, data, reload }) {
           <UserPlus size={34}/>
           <div>
             <h3>Crear usuario</h3>
-            <p className="meta">Crea acceso para jefe, conductor o monitor. En Supabase real se usa una Edge Function segura.</p>
+            <p className="meta">Crea acceso para administrador, jefe, conductor o monitor.</p>
           </div>
         </div>
 
@@ -1802,10 +1820,10 @@ function Usuarios({ profile, data, reload }) {
           <div className="field">
             <label>Rol</label>
             <select value={form.role} onChange={e=>set("role",e.target.value)}>
+              <option value="admin">Administrador</option>
               <option value="jefe">Jefe de tráfico</option>
               <option value="conductor">Conductor</option>
               <option value="monitor">Monitor</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
 
@@ -1823,7 +1841,7 @@ function Usuarios({ profile, data, reload }) {
         <button className="btn full" type="button" onClick={createUser}>Crear usuario</button>
 
         <div className="notice">
-          <b>Importante:</b> en producción esta acción necesita la Edge Function <code>create-user</code>. En modo demo se simula localmente.
+          <b>Administrador:</b> tiene control total sobre toda la aplicación.
         </div>
       </div>
 
@@ -1832,12 +1850,13 @@ function Usuarios({ profile, data, reload }) {
           <ShieldCheck size={32}/>
           <div>
             <h3>Usuarios existentes</h3>
-            <p className="meta">Listado de perfiles creados. Puedes activar/desactivar el acceso lógico desde aquí.</p>
+            <p className="meta">Perfiles creados y estado de acceso.</p>
           </div>
         </div>
 
         <div className="list">
-          {!people.length && <div className="item"><div className="meta">Todavía no hay perfiles reales cargados.</div></div>}
+          {!people.length && <div className="item"><div className="meta">Todavía no hay perfiles cargados.</div></div>}
+
           {people.map(p => (
             <div className="item" key={p.id}>
               <div>
@@ -2021,7 +2040,24 @@ function AjustesLogin() {
 }
 
 function App() {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfileState] = useState(() => {
+    try {
+      const saved = localStorage.getItem("mybusops_profile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  function setProfile(nextProfile) {
+    setProfileState(nextProfile);
+    if (nextProfile) {
+      localStorage.setItem("mybusops_profile", JSON.stringify(nextProfile));
+    } else {
+      localStorage.removeItem("mybusops_profile");
+      localStorage.removeItem("mybusops_tab");
+    }
+  }
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {

@@ -24,12 +24,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "No autenticado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { data: requesterProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("role")
-      .eq("id", requesterData.user.id)
-      .single();
-
+    const { data: requesterProfile } = await supabaseAdmin.from("profiles").select("role").eq("id", requesterData.user.id).single();
     if (!["admin", "jefe"].includes(requesterProfile?.role)) {
       return new Response(JSON.stringify({ error: "Sin permiso" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -62,7 +57,7 @@ serve(async (req) => {
       if (error) throw error;
     }
 
-    return new Response(JSON.stringify({ ok: true, user: created.user, profile }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, profile }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message || String(err) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }

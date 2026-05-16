@@ -2,12 +2,20 @@ import { supabase, supabaseConfigured } from "./supabase";
 import { INITIAL_DRIVERS, INITIAL_VEHICLES, INITIAL_MONITORS, INITIAL_SIGN_CODES } from "./seedData";
 
 const demoUsers = [
+  { id: "demo-admin", email: "admin@mybusops.local", password: "1234", full_name: "Administrador", role: "admin", phone: "", base: "Haro" },
   { id: "demo-jefe", email: "jefe@mybusops.local", password: "1234", full_name: "Jefe de tráfico", role: "jefe", phone: "", base: "Haro" },
   { id: "drv-diko", email: "diko@mybusops.local", password: "1234", full_name: "Diko Borislavov Dikov", role: "conductor", phone: "664251081", base: "Haro" },
   { id: "mon-cristina-ortega", email: "cristina@mybusops.local", password: "1234", full_name: "Cristina Ortega", role: "monitor", phone: "", base: "Haro" }
 ];
 
-let demoSessionProfile = null;
+let demoSessionProfile = (() => {
+  try {
+    const saved = localStorage.getItem("mybusops_profile");
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+})();
 
 const demo = {
   profile: null,
@@ -150,6 +158,7 @@ export async function signIn(email, password) {
     if (!user) throw new Error("Usuario o contraseña incorrectos.");
     const { password: _password, ...profile } = user;
     demoSessionProfile = profile;
+    localStorage.setItem("mybusops_profile", JSON.stringify(profile));
     return { profile, demo: true };
   }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -160,6 +169,8 @@ export async function signIn(email, password) {
 export async function signOut() {
   if (!supabaseConfigured) {
     demoSessionProfile = null;
+    localStorage.removeItem("mybusops_profile");
+    localStorage.removeItem("mybusops_tab");
     return;
   }
   await supabase.auth.signOut();
