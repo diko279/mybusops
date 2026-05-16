@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import {AlertTriangle, Bus, CalendarDays, Car, ClipboardList, FileText, Fingerprint, IdCard, Image, LayoutDashboard, LogOut, MessageSquare, Plane, Settings, ShieldCheck, UserPlus, UserRoundCog, Users} from "lucide-react";
+import {AlertTriangle, Bus, CalendarDays, Car, ClipboardList, FileText, Fingerprint, IdCard, Image, LayoutDashboard, LogOut, MessageSquare, Plane, Settings, ShieldCheck, UserPlus, UserRoundCog, Users, MessageCircle, Send, Edit3} from "lucide-react";
 import { getSession, signIn, signOut, listTable, insertRow, updateRow, deleteRow, createAuthUser } from "./lib/api";
 import { supabaseConfigured } from "./lib/supabase";
 import { BASES_RIOJACAR, KNOWN_PLACES, INITIAL_DRIVERS, INITIAL_VEHICLES, INITIAL_MONITORS, INITIAL_SIGN_CODES } from "./lib/seedData";

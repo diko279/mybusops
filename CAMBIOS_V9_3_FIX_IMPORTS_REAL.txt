@@ -1,0 +1,9 @@
+MyBusOps v9.3
+
+Corrección real de pantalla blanca:
+- Importados correctamente MessageCircle, Send y Edit3 desde lucide-react.
+- Verificado que todos los iconos usados en iconMap están importados.
+- Mantiene:
+  - menú móvil desplegable efecto cristal
+  - accesos en fichas de conductores/monitores
+  - sección Chat
