@@ -253,7 +253,7 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
   const nav = navByRole[profile.role] || navByRole.conductor;
 
   
-  const allowedTabsForRole = navByRole[profile.role] || navByRole.jefe || ["dashboard"];
+  const allowedTabsForRole = navByRole[profile?.role] || navByRole.jefe || ["dashboard"];
   useEffect(() => {
     if (!allowedTabsForRole.includes(tab)) {
       const fallback = allowedTabsForRole[0] || "dashboard";
@@ -2126,4 +2126,8 @@ useEffect(() => {
   return <Shell profile={profile} onProfileUpdate={setProfile} onLogout={()=>setProfile(null)}/>;
 }
 
-createRoot(document.getElementById("root")).render(<ErrorBoundary><AppErrorBoundary><App /></AppErrorBoundary></ErrorBoundary>);
+createRoot(document.getElementById("root")).render(
+  <AppErrorBoundary>
+    <App />
+  </AppErrorBoundary>
+);
