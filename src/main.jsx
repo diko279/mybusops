@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Bus, CalendarDays, Car, ClipboardList, IdCard, LayoutDashboard, LogOut, Users, UserRoundCog, AlertTriangle, Image, Settings } from "lucide-react";
-import { getSession, signIn, signOut, listTable, insertRow, updateRow, deleteRow } from "./lib/api";
+import { Bus, CalendarDays, Car, ClipboardList, IdCard, LayoutDashboard, LogOut, Users, UserRoundCog, AlertTriangle, Image, Settings , UserPlus, ShieldCheck } from "lucide-react";
+import { getSession, signIn, signOut, listTable, insertRow, updateRow, deleteRow, createAuthUser } from "./lib/api";
 import { supabaseConfigured } from "./lib/supabase";
 import { BASES_RIOJACAR, KNOWN_PLACES, INITIAL_DRIVERS, INITIAL_VEHICLES, INITIAL_MONITORS, INITIAL_SIGN_CODES } from "./lib/seedData";
 import "./styles/app.css";
@@ -52,7 +52,7 @@ const iconMap = {
 
 const navByRole = {
   admin: ["dashboard", "conductores", "vehiculos", "monitores", "servicios", "caducidades", "ajustes"],
-  jefe: ["dashboard", "perfil", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades"],
+  jefe: ["dashboard", "perfil", "usuarios", "conductores", "vehiculos", "monitores", "servicios", "codigos", "bases", "caducidades"],
   conductor: ["dashboard", "perfil", "servicios", "caducidades"],
   monitor: ["dashboard", "perfil", "servicios"]
 };
@@ -1714,6 +1714,139 @@ function PortalInicio({ profile, data }) {
                 <div className="meta">{n.created_at || ""}</div>
                 <div>{n.message}</div>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+
+function Usuarios({ profile, data, reload }) {
+  const empty = {
+    full_name: "",
+    email: "",
+    phone: "",
+    password: "1234",
+    role: "conductor",
+    base: "Haro",
+    create_person_record: true
+  };
+
+  const [form, setForm] = useState(empty);
+  const isStaff = ["admin","jefe"].includes(profile.role);
+
+  if (!isStaff) {
+    return <div className="card"><h3>Sin permiso</h3><p className="meta">Solo jefe/admin puede gestionar usuarios.</p></div>;
+  }
+
+  function set(name, value) {
+    setForm(prev => ({ ...prev, [name]: value }));
+  }
+
+  async function createUser() {
+    try {
+      if (!form.full_name.trim() || !form.email.trim() || !form.password.trim()) {
+        alert("Nombre, email y contraseña son obligatorios.");
+        return;
+      }
+
+      const result = await createAuthUser({
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        password: form.password,
+        role: form.role,
+        base: form.base,
+        create_person_record: form.create_person_record
+      });
+
+      alert(result.demo
+        ? "Usuario creado en modo demo/local."
+        : "Usuario creado correctamente en Supabase Auth.");
+
+      setForm(empty);
+      await reload();
+    } catch (err) {
+      console.error(err);
+      alert("Error creando usuario: " + (err.message || err));
+    }
+  }
+
+  async function toggleProfile(p) {
+    await updateRow("profiles", p.id, { disabled: !p.disabled });
+    await reload();
+  }
+
+  const people = data.profiles || [];
+
+  return (
+    <>
+      <div className="card">
+        <div className="form-title-row">
+          <UserPlus size={34}/>
+          <div>
+            <h3>Crear usuario</h3>
+            <p className="meta">Crea acceso para jefe, conductor o monitor. En Supabase real se usa una Edge Function segura.</p>
+          </div>
+        </div>
+
+        <div className="form-grid">
+          <Field label="Nombre completo" value={form.full_name} set={v=>set("full_name",v)}/>
+          <Field label="Email" type="email" value={form.email} set={v=>set("email",v)}/>
+          <Field label="Teléfono" value={form.phone} set={v=>set("phone",v)}/>
+          <Field label="Contraseña inicial" type="text" value={form.password} set={v=>set("password",v)}/>
+
+          <div className="field">
+            <label>Rol</label>
+            <select value={form.role} onChange={e=>set("role",e.target.value)}>
+              <option value="jefe">Jefe de tráfico</option>
+              <option value="conductor">Conductor</option>
+              <option value="monitor">Monitor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <BaseSelect value={form.base} set={v=>set("base",v)}/>
+
+          <div className="field">
+            <label>Crear ficha asociada</label>
+            <select value={form.create_person_record ? "si" : "no"} onChange={e=>set("create_person_record", e.target.value === "si")}>
+              <option value="si">Sí, crear conductor/monitor si corresponde</option>
+              <option value="no">No, solo usuario</option>
+            </select>
+          </div>
+        </div>
+
+        <button className="btn full" type="button" onClick={createUser}>Crear usuario</button>
+
+        <div className="notice">
+          <b>Importante:</b> en producción esta acción necesita la Edge Function <code>create-user</code>. En modo demo se simula localmente.
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="form-title-row">
+          <ShieldCheck size={32}/>
+          <div>
+            <h3>Usuarios existentes</h3>
+            <p className="meta">Listado de perfiles creados. Puedes activar/desactivar el acceso lógico desde aquí.</p>
+          </div>
+        </div>
+
+        <div className="list">
+          {!people.length && <div className="item"><div className="meta">Todavía no hay perfiles reales cargados.</div></div>}
+          {people.map(p => (
+            <div className="item" key={p.id}>
+              <div>
+                <h3>{p.full_name}</h3>
+                <div className="meta">{p.email || "-"} · Rol: {p.role} · Base: {p.base || "-"} · Estado: {p.disabled ? "desactivado" : "activo"}</div>
+              </div>
+              <button className="btn small ghost" type="button" onClick={()=>toggleProfile(p)}>
+                {p.disabled ? "Activar" : "Desactivar"}
+              </button>
             </div>
           ))}
         </div>

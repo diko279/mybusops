@@ -213,3 +213,5 @@ textarea{resize:vertical}
 .calendar-day.has-service{border-color:#cc2020;background:#fff7f7}
 .calendar-day em{font-style:normal;color:#777}
 @media(max-width:700px){.calendar-grid{gap:4px}.calendar-day{min-height:70px;padding:5px;font-size:10px}}
+
+.notice code{background:rgba(255,255,255,.7);padding:2px 5px;border-radius:6px}

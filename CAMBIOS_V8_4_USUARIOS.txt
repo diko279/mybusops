@@ -1,0 +1,13 @@
+MyBusOps v8.4 - Usuarios
+
+Añadido:
+- Nueva sección Usuarios para jefe/admin.
+- Crear usuarios con nombre, email, teléfono, rol, base y contraseña inicial.
+- Crear automáticamente ficha de conductor/monitor.
+- Activar/desactivar perfiles.
+- Modo demo funcionando.
+- Edge Function segura incluida en supabase/functions/create-user.
+- Migración SQL incluida: supabase/migration_usuarios_v8_4.sql.
+
+Importante:
+Para crear usuarios reales en Supabase Auth hay que desplegar la Edge Function.

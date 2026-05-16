@@ -201,3 +201,56 @@ export async function deleteRow(table, id) {
   const { error } = await supabase.from(table).delete().eq("id", id);
   if (error) throw error;
 }
+
+
+export async function createAuthUser(payload) {
+  if (!supabaseConfigured) {
+    const id = (crypto.randomUUID?.() || String(Date.now()));
+    const profile = {
+      id,
+      full_name: payload.full_name,
+      email: payload.email,
+      phone: payload.phone || "",
+      role: payload.role,
+      base: payload.base || "",
+      disabled: false
+    };
+
+    demo.profiles = [profile, ...(demo.profiles || [])];
+
+    if (payload.create_person_record && payload.role === "conductor") {
+      demo.conductores = [{
+        id: "drv-" + id,
+        user_id: id,
+        full_name: payload.full_name,
+        phone: payload.phone || "",
+        email: payload.email,
+        base: payload.base || "",
+        status: "activo",
+        authorized_vehicle_ids: []
+      }, ...(demo.conductores || [])];
+    }
+
+    if (payload.create_person_record && payload.role === "monitor") {
+      demo.monitores = [{
+        id: "mon-" + id,
+        user_id: id,
+        full_name: payload.full_name,
+        phone: payload.phone || "",
+        email: payload.email,
+        base: payload.base || "",
+        status: "activo"
+      }, ...(demo.monitores || [])];
+    }
+
+    return { demo: true, profile };
+  }
+
+  const { data, error } = await supabase.functions.invoke("create-user", {
+    body: payload
+  });
+
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
