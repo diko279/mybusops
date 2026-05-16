@@ -133,6 +133,46 @@ const defaultBackgrounds = [
   "https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?auto=format&fit=crop&w=1800&q=80"
 ];
 
+
+function HardErrorScreen({ error }) {
+  function resetApp() {
+    localStorage.removeItem("mybusops_profile");
+    localStorage.removeItem("mybusops_tab");
+    location.reload();
+  }
+
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <h1>Error al abrir MyBusOps</h1>
+        <div className="error-box">{String(error?.message || error || "Error desconocido")}</div>
+        <p>No pasa nada: se puede deber a una sesión guardada de una versión anterior.</p>
+        <button className="btn full" onClick={resetApp}>Reiniciar sesión y limpiar caché</button>
+      </div>
+    </div>
+  );
+}
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("MyBusOps error:", error, info);
+  }
+
+  render() {
+    if (this.state.error) return <HardErrorScreen error={this.state.error}/>;
+    return this.props.children;
+  }
+}
+
 function Login({ onLogin }) {
   const [email, setEmail] = useState("jefe@mybusops.local");
   const [password, setPassword] = useState("1234");
@@ -212,7 +252,16 @@ function Shell({ profile, onProfileUpdate, onLogout }) {
   const [loading, setLoading] = useState(false);
   const nav = navByRole[profile.role] || navByRole.conductor;
 
-  async function load() {
+  
+  const allowedTabsForRole = navByRole[profile.role] || navByRole.jefe || ["dashboard"];
+  useEffect(() => {
+    if (!allowedTabsForRole.includes(tab)) {
+      const fallback = allowedTabsForRole[0] || "dashboard";
+      setTab(fallback);
+    }
+  }, [profile.role, tab]);
+
+async function load() {
     setLoading(true);
     try {
       const [conductoresRaw, vehiculosRaw, monitoresRaw, servicios, sign_codes, profiles] = await Promise.all([
@@ -2060,7 +2109,15 @@ function App() {
   }
   const [checking, setChecking] = useState(true);
 
+  
+  const validSavedRoles = ["admin", "jefe", "conductor", "monitor"];
   useEffect(() => {
+    if (profile && !validSavedRoles.includes(profile.role)) {
+      setProfile(null);
+    }
+  }, []);
+
+useEffect(() => {
     getSession().then(r => setProfile(r.profile)).finally(()=>setChecking(false));
   }, []);
 
@@ -2069,4 +2126,4 @@ function App() {
   return <Shell profile={profile} onProfileUpdate={setProfile} onLogout={()=>setProfile(null)}/>;
 }
 
-createRoot(document.getElementById("root")).render(<ErrorBoundary><App /></ErrorBoundary>);
+createRoot(document.getElementById("root")).render(<ErrorBoundary><AppErrorBoundary><App /></AppErrorBoundary></ErrorBoundary>);

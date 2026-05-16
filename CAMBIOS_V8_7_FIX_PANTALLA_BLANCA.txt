@@ -1,0 +1,8 @@
+MyBusOps v8.7
+
+Corrección:
+- Añadido sistema anti-pantalla blanca.
+- Si hay una sesión/pestaña guardada incompatible, se muestra pantalla de recuperación.
+- Botón para limpiar sesión/caché y volver al login.
+- Validación de pestañas permitidas por rol.
+- Login incluye admin@mybusops.local / 1234.

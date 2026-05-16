@@ -215,3 +215,5 @@ textarea{resize:vertical}
 @media(max-width:700px){.calendar-grid{gap:4px}.calendar-day{min-height:70px;padding:5px;font-size:10px}}
 
 .notice code{background:rgba(255,255,255,.7);padding:2px 5px;border-radius:6px}
+
+.error-box{background:#fff2f2;border:1px solid #e5b4b4;color:#8b0000;border-radius:12px;padding:12px;margin:12px 0;font-family:monospace;word-break:break-word}
