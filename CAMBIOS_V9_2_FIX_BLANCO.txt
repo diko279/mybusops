@@ -1,0 +1,7 @@
+MyBusOps v9.2
+
+Corrección de pantalla blanca:
+- Revisadas pestañas de navegación y renders.
+- Añadidas protecciones para que toda pestaña del menú tenga componente.
+- Menú móvil desplegable mantenido.
+- Accesos en fichas de conductores/monitores mantenidos.
